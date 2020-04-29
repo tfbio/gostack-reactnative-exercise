@@ -21,7 +21,24 @@ export default function App() {
   []);
 
   async function handleLikeRepository(id) {
-    await api.post(`/repositories/${id}/like`);
+    const apiResponse =await api.post(`/repositories/${id}/like`);
+    const apiData = apiResponse.data;
+    console.log(apiData);
+    
+    const repositoryUpdate  = repository.map(repo => {
+      if( repo.id === id ){
+        console.log('repo do teste foi encontrado');
+        return apiData;
+      }else{
+        console.log('repo do test não é este ou não foi encontrado no map!');
+        return repo;
+      }
+    });
+
+    console.log('Saindo do map/if e usando setRepository');
+    console.log(repositoryUpdate);
+    console.log('usando agora setRepository');
+    setRepository(repositoryUpdate);
   }
 
   return (
@@ -31,30 +48,32 @@ export default function App() {
       <FlatList
         data={repository}
         keyExtractor={repository => repository.id}
-        renderItem={({ item: repository }) => (
+        renderItem={({ item: repo }) => (
         
           <View style={styles.repositoryContainer}>
             <Text style={styles.repository}>
-              {repository.title}
+              {repo.title}
             </Text>
 
             <View style={styles.techsContainer}>
-              <Text style={styles.tech}>
-                {repository.techs}
-              </Text>
+              {repo.techs.map(tech => (
+                <Text key={tech} style={styles.tech}>
+                  {tech}
+                </Text>
+              ))} 
             </View>
 
             <View style={styles.likesContainer}>
-              <Text style={styles.likeText} testID={repository.id}>
-                {`${repository.likes} curtidas`}
+              <Text style={styles.likeText} testID={`repository-likes-${repo.id}`}>
+                {`${repo.likes} curtida${repo.likes ? 's':' '}`}
               </Text>
             </View>
 
             <TouchableOpacity style={styles.button}>
               <Text 
                 style={styles.buttonText}
-                onPress={() => handleLikeRepository(repository.id)}
-                testID={repository.id}
+                onPress={() => handleLikeRepository(repo.id)}
+                testID={`like-button-${repo.id}`}
               >
                 Like
               </Text>
@@ -64,20 +83,6 @@ export default function App() {
           </View>
         )}
       />
-
-
-      {/*
-
-              // Remember to replace "1" below with repository ID: {`repository-likes-${repository.id}`}
-              testID={`repository-likes-1`}
- 
-            onPress={() => handleLikeRepository(1)}
-            // Remember to replace "1" below with repository ID: {`like-button-${repository.id}`}
-            testID={`like-button-1`}
- 
-      */}
-
-
       </SafeAreaView>
     </>
   );
